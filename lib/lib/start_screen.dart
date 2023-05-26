@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'modele.dart';
+
 class StartScreen extends StatelessWidget {
   // La fonction du Widget Quiz à appeler pour naviguer vers QuestionScreen
-  final void Function() startDemineur;
 
-  // Constructeur
-  const StartScreen(this.startDemineur, {super.key});
+  final Function(Difficulte) startDemineur;
+  const StartScreen(this.startDemineur, {Key? key}) : super(key: key);
 
   // Construction de l'UI du Widget StartScreen
   @override
@@ -31,7 +32,7 @@ class StartScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               OutlinedButton.icon(
-                onPressed: startDemineur,
+                onPressed: () => startDemineur(Difficulte.facile),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                 ),
@@ -40,7 +41,7 @@ class StartScreen extends StatelessWidget {
               ),
               const SizedBox(width: 20),
               OutlinedButton.icon(
-                onPressed: startDemineur,
+                onPressed: () => startDemineur(Difficulte.moyen),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                 ),
@@ -49,7 +50,7 @@ class StartScreen extends StatelessWidget {
               ),
               const SizedBox(width: 20),
               OutlinedButton.icon(
-                onPressed: startDemineur,
+                onPressed: () => startDemineur(Difficulte.difficile),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.white,
                 ),

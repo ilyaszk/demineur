@@ -1,13 +1,15 @@
+import 'dart:async';
+
 import 'package:demineur/lib/start_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'demineur_screen.dart';
+import 'modele.dart';
 
 // Widget principal qui gère l'état de toute l'application
 // et affiche soit StartScreen, soit QuestionsScreen, soit ResultsScreen
 class Demineur extends StatefulWidget {
-  // Contructeur
-  const Demineur({super.key});
+  const Demineur({Key? key}) : super(key: key);
 
   // Instanciation de l'état _DemineurState associé au widget Demineur
   @override
@@ -17,7 +19,7 @@ class Demineur extends StatefulWidget {
 }
 
 // Les différents types de Screen à afficher
-enum ScreenState { start, demineur}
+enum ScreenState { start, demineur }
 
 // L'état associé au widget Demineur
 class _DemineurState extends State<Demineur> {
@@ -25,10 +27,16 @@ class _DemineurState extends State<Demineur> {
   // Pour savoir quel widget afficher
   ScreenState screenState = ScreenState.start;
 
+  // La difficulté choisie par l'utilisateur
+  late Difficulte difficulte = Difficulte.facile;
+
   // Méthode appelée depuis StartScreen pour "naviguer" vers QuestionsScreen
-  void startDemineur() {
+  void startDemineur(Difficulte? diff) {
     setState(() {
       screenState = ScreenState.demineur; // on va afficher QuestionScreen
+      if (diff != null) {
+        difficulte = diff;
+      }
     });
   }
 
@@ -37,6 +45,46 @@ class _DemineurState extends State<Demineur> {
     setState(() {
       screenState = ScreenState.start; // On va afficher StartScreen
     });
+  }
+
+  int getTailleFromDifficulte(Difficulte difficulte) {
+    switch (difficulte) {
+      case Difficulte.facile:
+        return 5;
+      case Difficulte.moyen:
+        return 10;
+      case Difficulte.difficile:
+        return 15;
+      default:
+        return 8; // Valeur par défaut pour la difficulté facile
+    }
+  }
+
+  int getNbMinesFromDifficulte(Difficulte difficulte) {
+    switch (difficulte) {
+      case Difficulte.facile:
+        return 5;
+      case Difficulte.moyen:
+        return 15;
+      case Difficulte.difficile:
+        return 30;
+      default:
+        return 10; // Valeur par défaut pour la difficulté facile
+    }
+  }
+
+  Duration getDurationFromDifficulte(Difficulte difficulte) {
+    switch (difficulte) {
+      case Difficulte.facile:
+        return const Duration(minutes: 5);
+      case Difficulte.moyen:
+        return const Duration(minutes: 10);
+      case Difficulte.difficile:
+        return const Duration(minutes: 15);
+      default:
+        return const Duration(
+            minutes: 1); // Valeur par défaut pour la difficulté facile
+    }
   }
 
   // Retourne le widget à afficher selon l'état (valeur de screenState)
@@ -49,8 +97,9 @@ class _DemineurState extends State<Demineur> {
       case ScreenState.demineur:
         {
           return DemineurScreen(
-            10,
-            10,
+            getTailleFromDifficulte(difficulte),
+            getNbMinesFromDifficulte(difficulte),
+            getDurationFromDifficulte(difficulte),
             reStartDemineur,
           );
         }

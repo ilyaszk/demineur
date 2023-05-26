@@ -1,35 +1,84 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:demineur/lib/modele.dart' as modele;
 
 class DemineurScreen extends StatefulWidget {
   final int taille;
   final int nbMines;
+  final Duration timer;
   final Function onRestart;
 
-  DemineurScreen(this.taille, this.nbMines, this.onRestart);
+  DemineurScreen(this.taille, this.nbMines, this.timer, this.onRestart);
 
   @override
-  State<StatefulWidget> createState() => _DemineurScreen();
+  State<StatefulWidget> createState() => _DemineurScreenState();
 }
 
-class _DemineurScreen extends State<DemineurScreen> {
+class _DemineurScreenState extends State<DemineurScreen> {
   late modele.Grille _grille;
   bool gameOver = false;
+  late Stopwatch _stopwatch;
+  Timer? _timer;
 
   @override
   void initState() {
-    _grille = modele.Grille(widget.taille, widget.nbMines);
     super.initState();
+    _grille = modele.Grille(widget.taille, widget.nbMines);
+    _stopwatch = Stopwatch();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _stopwatch.stop();
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _stopwatch.start();
+    _timer = Timer.periodic(widget.timer, (_) {
+      setState(() {});
+    });
+  }
+
+  String get formattedTime {
+    final minutes = (_stopwatch.elapsed.inSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (_stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        Container(
+          padding: EdgeInsets.fromLTRB(0, 30, 0, 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Text(
+                '💣: ${widget.nbMines}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                ),
+              ),
+              Text(
+                '🕰️:  $formattedTime',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 30,
+                ),
+              ),
+            ],
+          ),
+        ),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.7, // Adjust the height as per your requirement
+          height: MediaQuery.of(context).size.height * 0.6, // Adjust the height as per your requirement
           child: GridView.builder(
-            padding: EdgeInsets.fromLTRB(10, 50, 10, 10),
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
             itemCount: widget.taille * widget.taille,
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: widget.taille,

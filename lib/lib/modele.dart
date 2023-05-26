@@ -22,6 +22,9 @@ class Case {
 // Type d'action qu'un joueur peut réaliser sur une case
 enum Action { decouvrir, marquer }
 
+//difficulté du jeu
+enum Difficulte { facile, moyen, difficile }
+
 // Coup réalisé par le joueur
 class Coup {
   Coordonnees coordonnees;
