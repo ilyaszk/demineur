@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:demineur/lib/start_screen.dart';
 import 'package:flutter/material.dart';
@@ -72,22 +71,7 @@ class _DemineurState extends State<Demineur> {
         return 10; // Valeur par défaut pour la difficulté facile
     }
   }
-
-  Duration getDurationFromDifficulte(Difficulte difficulte) {
-    switch (difficulte) {
-      case Difficulte.facile:
-        return const Duration(minutes: 5);
-      case Difficulte.moyen:
-        return const Duration(minutes: 10);
-      case Difficulte.difficile:
-        return const Duration(minutes: 15);
-      default:
-        return const Duration(
-            minutes: 1); // Valeur par défaut pour la difficulté facile
-    }
-  }
-
-  // Retourne le widget à afficher selon l'état (valeur de screenState)
+    // Retourne le widget à afficher selon l'état (valeur de screenState)
   Widget chooseScreenWidget() {
     switch (screenState) {
       case ScreenState.start:
@@ -99,7 +83,6 @@ class _DemineurState extends State<Demineur> {
           return DemineurScreen(
             getTailleFromDifficulte(difficulte),
             getNbMinesFromDifficulte(difficulte),
-            getDurationFromDifficulte(difficulte),
             reStartDemineur,
           );
         }

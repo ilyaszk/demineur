@@ -6,10 +6,11 @@ import 'package:demineur/lib/modele.dart' as modele;
 class DemineurScreen extends StatefulWidget {
   final int taille;
   final int nbMines;
-  final Duration timer;
+
+  // final Duration timer;
   final Function onRestart;
 
-  DemineurScreen(this.taille, this.nbMines, this.timer, this.onRestart);
+  DemineurScreen(this.taille, this.nbMines, this.onRestart);
 
   @override
   State<StatefulWidget> createState() => _DemineurScreenState();
@@ -17,36 +18,42 @@ class DemineurScreen extends StatefulWidget {
 
 class _DemineurScreenState extends State<DemineurScreen> {
   late modele.Grille _grille;
-  bool gameOver = false;
-  late Stopwatch _stopwatch;
-  Timer? _timer;
+
+  // Initialize an instance of Stopwatch
+  final Stopwatch _stopwatch = Stopwatch();
+
+  // Timer
+  late Timer _timer;
+
+  String _result = '00:00:00';
+
+  void _start() {
+    // Timer.periodic() will call the callback function every 100 milliseconds
+    _timer = Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
+      // Update the UI
+      setState(() {
+        // result in hh:mm:ss format
+        _result =
+            '${_stopwatch.elapsed.inMinutes.toString().padLeft(2, '0')}:${(_stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0')}:${(_stopwatch.elapsed.inMilliseconds % 100).toString().padLeft(2, '0')}';
+      });
+    });
+    // Start the stopwatch
+    _stopwatch.start();
+  }
+
+  // This function will be called when the user presses the Stop button
+  void _stop() {
+    _timer.cancel();
+    _stopwatch.stop();
+  }
+
+  // This function will be called when the user presses the Reset button
 
   @override
   void initState() {
     super.initState();
     _grille = modele.Grille(widget.taille, widget.nbMines);
-    _stopwatch = Stopwatch();
-    _startTimer();
-  }
-
-  @override
-  void dispose() {
-    _stopwatch.stop();
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  void _startTimer() {
-    _stopwatch.start();
-    _timer = Timer.periodic(widget.timer, (_) {
-      setState(() {});
-    });
-  }
-
-  String get formattedTime {
-    final minutes = (_stopwatch.elapsed.inSeconds ~/ 60).toString().padLeft(2, '0');
-    final seconds = (_stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
+    _start();
   }
 
   @override
@@ -66,7 +73,7 @@ class _DemineurScreenState extends State<DemineurScreen> {
                 ),
               ),
               Text(
-                '🕰️:  $formattedTime',
+                '🕰️: $_result',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 30,
@@ -76,7 +83,8 @@ class _DemineurScreenState extends State<DemineurScreen> {
           ),
         ),
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6, // Adjust the height as per your requirement
+          height: MediaQuery.of(context).size.height *
+              0.6, // Adjust the height as per your requirement
           child: GridView.builder(
             padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
             itemCount: widget.taille * widget.taille,
@@ -89,8 +97,9 @@ class _DemineurScreenState extends State<DemineurScreen> {
               modele.Coordonnees coord = modele.Coordonnees(ligne, colonne);
               modele.Case caseActuelle = _grille.getCase(coord);
 
-              if (gameOver) {
+              if (_grille.isFinie()) {
                 caseActuelle.decouverte = true; // Reveal all cases
+                _stop();
               }
 
               return Material(
@@ -99,18 +108,18 @@ class _DemineurScreenState extends State<DemineurScreen> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      if (!gameOver) {
-                        modele.Coup coup =
-                        modele.Coup(ligne, colonne, modele.Action.decouvrir);
+                      if (!_grille.isPerdue()) {
+                        modele.Coup coup = modele.Coup(
+                            ligne, colonne, modele.Action.decouvrir);
                         _grille.mettreAJour(coup);
-                      }else{
+                      } else {
                         null;
                       }
                     });
                   },
                   onLongPress: () {
                     setState(() {
-                      if (!gameOver) {
+                      if (!_grille.isPerdue()) {
                         caseActuelle.marquee = !caseActuelle.marquee;
                       }
                     });
@@ -143,7 +152,11 @@ class _DemineurScreenState extends State<DemineurScreen> {
           alignment: Alignment.bottomCenter,
           padding: EdgeInsets.fromLTRB(0, 0, 0, 20),
           child: Text(
-            _grille.isGagnee() ? 'You won! ✌️' : _grille.isPerdue() ? 'You lost! 💣' : '',
+            _grille.isGagnee()
+                ? 'You won! ✌️'
+                : _grille.isPerdue()
+                    ? 'You lost! 💣'
+                    : '',
             style: TextStyle(
               color: Colors.white,
               fontSize: 30,
@@ -156,10 +169,9 @@ class _DemineurScreenState extends State<DemineurScreen> {
             onPressed: () {
               setState(() {
                 widget.onRestart();
-                gameOver = false;
               });
             },
-            child: Text('Restart'),
+            child: Text('Retour'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0x988E7DFF),
               shape: RoundedRectangleBorder(
@@ -175,9 +187,10 @@ class _DemineurScreenState extends State<DemineurScreen> {
       ],
     );
   }
+
   String caseToText(modele.Case laCase) {
     if (laCase.minee) {
-      return 'B';
+      return '💣';
     } else if (laCase.marquee) {
       return 'M';
     } else if (laCase.decouverte) {
@@ -200,7 +213,6 @@ class _DemineurScreenState extends State<DemineurScreen> {
   void resetGame() {
     setState(() {
       _grille = modele.Grille(widget.taille, widget.nbMines);
-      gameOver = false;
     });
   }
 }
