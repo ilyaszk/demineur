@@ -1,68 +1,108 @@
+import 'package:demineur/lib/demineur_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'modele.dart';
 
-class StartScreen extends StatelessWidget {
-  // La fonction du Widget Quiz à appeler pour naviguer vers QuestionScreen
+class StartScreen extends StatefulWidget {
+  const StartScreen({Key? key}) : super(key: key);
 
-  final Function(Difficulte) startDemineur;
-  const StartScreen(this.startDemineur, {Key? key}) : super(key: key);
-
-  // Construction de l'UI du Widget StartScreen
   @override
-  Widget build(context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            'assets/images/logo-app.png',
-            width: 300,
-          ),
-          const SizedBox(height: 80),
-          const Text(
-            'Demineur',
-            style: TextStyle(
-              color: Color.fromARGB(255, 237, 223, 252),
-              fontSize: 24,
+  _StartScreenState createState() => _StartScreenState();
+}
+
+class _StartScreenState extends State<StartScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 30),
+                Image.asset(
+                  'assets/images/logo-app.png',
+                  width: 300,
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Demineur',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 100, 52, 63),
+                    fontSize: 24,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Nom',
+                          border: UnderlineInputBorder(),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Veuillez saisir un nom.';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          _name = value;
+                        },
+                      ),
+                      const SizedBox(height: 10),
+                      DropdownButton<Difficulte>(
+                        value: _selectedDifficulty,
+                        onChanged: (Difficulte? newValue) {
+                          setState(() {
+                            _selectedDifficulty = newValue!;
+                          });
+                        },
+                        items: Difficulte.values.map((Difficulte difficulty) {
+                          return DropdownMenuItem<Difficulte>(
+                            value: difficulty,
+                            child: Text(
+                              difficulty.name.toUpperCase(),
+                              style: const TextStyle(fontSize: 16.0),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _formKey.currentState!.save();
+                            // widget.startDemineur(_selectedDifficulty, _name!);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DemineurScreen(_name!, _selectedDifficulty),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text('Commencer'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 30),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => startDemineur(Difficulte.facile),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                ),
-                icon: const Icon(Icons.arrow_right_alt),
-                label: const Text('Facile 💣'),
-              ),
-              const SizedBox(width: 20),
-              OutlinedButton.icon(
-                onPressed: () => startDemineur(Difficulte.moyen),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                ),
-                icon: const Icon(Icons.arrow_right_alt),
-                label: const Text('Moyen 💣💣'),
-              ),
-              const SizedBox(width: 20),
-              OutlinedButton.icon(
-                onPressed: () => startDemineur(Difficulte.difficile),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                ),
-
-                icon: const Icon(Icons.arrow_right_alt),
-                label: const Text('Difficile 💣💣💣'),
-              ),
-
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
+
+  String? _name;
+
+  Difficulte _selectedDifficulty = Difficulte.facile;
 }
