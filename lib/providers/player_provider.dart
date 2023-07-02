@@ -10,8 +10,11 @@ class Player extends ChangeNotifier {
   String _temps = '00:00:00';
 
   String get name => _name;
+
   Difficulte get difficulte => _difficulte;
+
   String get temps => _temps;
+
 
   void changeName(String newName) {
     _name = newName;

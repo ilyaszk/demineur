@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../providers/player_provider.dart';
+import '../providers/scoreboard_provider.dart';
 import 'modele.dart';
 
 class DemineurScreen extends ConsumerStatefulWidget {
@@ -23,8 +24,10 @@ class _DemineurScreenState extends ConsumerState<DemineurScreen> {
   late int taille;
   late int nbMines;
   late Difficulte difficulte;
+
   // Initialize an instance of Stopwatch
   final Stopwatch _stopwatch = Stopwatch();
+
   // Timer
   late Timer _timer;
   String _result = '00:00:00';
@@ -189,6 +192,10 @@ class _DemineurScreenState extends ConsumerState<DemineurScreen> {
                   onPressed: () {
                     ref.read(playerProvider.notifier).changeTemps(
                         _result); // Change the time in the playerProvider
+                    Future.delayed(Duration.zero, () {
+                      ref.read(scoreBoardProvider.notifier).addPlayer(ref
+                          .read(playerProvider)); // Add the player to the scoreboard
+                    });
                     Navigator.push(
                       context,
                       MaterialPageRoute(

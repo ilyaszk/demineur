@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/player_provider.dart';
+import '../providers/scoreboard_provider.dart';
 import 'demineur_screen.dart';
 import 'modele.dart';
 
@@ -16,6 +17,7 @@ class StartScreen extends ConsumerStatefulWidget {
 
 class _StartScreenState extends ConsumerState<StartScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,8 +58,9 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'Veuillez saisir un nom.';
                               }
-                              ref.read(playerProvider.notifier).changeName(
-                                  value);
+                              ref
+                                  .read(playerProvider.notifier)
+                                  .changeName(value);
                             },
                             onSaved: (value) {
                               player.changeName(value!);
@@ -70,8 +73,9 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                         value: ref.read(playerProvider.notifier).difficulte,
                         onChanged: (Difficulte? newValue) {
                           setState(() {
-                            ref.read(playerProvider.notifier).changeDifficulte(
-                                newValue!);
+                            ref
+                                .read(playerProvider.notifier)
+                                .changeDifficulte(newValue!);
                           });
                         },
                         items: Difficulte.values.map((Difficulte difficulty) {
@@ -99,6 +103,91 @@ class _StartScreenState extends ConsumerState<StartScreen> {
                         },
                         child: const Text('Commencer'),
                       ),
+                      ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text(
+                                  'Scoreboard',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
+                                content: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      Table(
+                                        border: TableBorder.all(),
+                                        children: [
+                                          const TableRow(children: [
+                                            TableCell(
+                                              child: Text(
+                                                'Nom',
+                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Text(
+                                                'Difficulté',
+                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Text(
+                                                'Temps',
+                                                style: TextStyle(fontWeight: FontWeight.bold),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ]),
+                                          ...ref
+                                              .read(scoreBoardProvider)
+                                              .players
+                                              .map((e) => TableRow(children: [
+                                            TableCell(
+                                              child: Text(
+                                                e.name,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Text(
+                                                e.difficulte.name,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                            TableCell(
+                                              child: Text(
+                                                e.temps,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                            ),
+                                          ]))
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                actions: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: const Text('Fermer'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        child: const Text('Scoreboard'),
+                      )
                     ],
                   ),
                 ),
@@ -109,6 +198,4 @@ class _StartScreenState extends ConsumerState<StartScreen> {
       ),
     );
   }
-
-  Difficulte _selectedDifficulty = Difficulte.facile;
 }
